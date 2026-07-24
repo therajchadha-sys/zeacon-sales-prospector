@@ -1,0 +1,42 @@
+{
+  "frameworks": {
+    "spin_selling": {
+      "name": "SPIN Selling",
+      "structure": [
+        "Situation: Observe a specific fact about their storefront",
+        "Problem: Identify the hidden inefficiency or missing video capability",
+        "Implication: Highlight the business cost (higher bounce rates, wasted ad spend)",
+        "Need-Payoff: Show how Zeacon unlocks measurable conversion lift"
+      ]
+    },
+    "challenger_sale": {
+      "name": "Challenger Sale",
+      "guideline": "Teach the prospect something counterintuitive about video commerce. Reframe static embeds as conversion leaks."
+    },
+    "gap_selling": {
+      "name": "Gap Selling",
+      "benchmarks": {
+        "cart_abandonment": "69.8% average e-commerce cart abandonment rate (Baymard Institute)",
+        "time_on_site": "Interactive video players increase dwell time by up to 4x",
+        "mobile_conversion": "73% of e-commerce traffic is mobile, where text-heavy pages bounce fastest"
+      }
+    }
+  },
+  "personas": {
+    "marketing": {
+      "focus": "ROAS, Customer Acquisition Cost (CAC), and Social Ad Landing Page Alignment",
+      "tactic": "Pitch converting social video ad traffic into checkout sales without losing engagement on static landing pages.",
+      "hook_style": "Focus on turning paid traffic into immediate buyers."
+    },
+    "ecommerce": {
+      "focus": "Conversion Rate Optimization (CRO), Average Order Value (AOV), and Page Speed",
+      "tactic": "Highlight Zeacon's lightweight asynchronous player that loads in <50ms with zero impact on Google Core Web Vitals.",
+      "hook_style": "Focus on CRO wins and zero page-speed penalty."
+    },
+    "founder": {
+      "focus": "Brand Loyalty, Scalable Revenue Growth, and Customer Engagement",
+      "tactic": "Show how top D2C brands turn product reviews and founder story videos into automated revenue engines.",
+      "hook_style": "High-level strategic vision and competitive advantage."
+    }
+  }
+}
