@@ -9,6 +9,19 @@ from bs4 import BeautifulSoup
 from models import DomainScore
 
 ENTERPRISE_KNOWLEDGE_VAULT = {
+    "gymshark": {
+        "business_type": "D2C Global Activewear & Athletic Enterprise",
+        "conversion_model": "Shopify Plus Enterprise Storefront",
+        "conversion_details": "Global Direct-to-Consumer Activewear Cart",
+        "reviews_engine": "Yotpo",
+        "competitor_video": "None detected",
+        "analytics_cro": "Hotjar & Google Analytics 4",
+        "email_marketing": "Klaviyo & Attentive",
+        "pixels": ["Meta Pixel", "TikTok Pixel", "Google Tag Manager", "Pinterest Tag"],
+        "traffic_tech": "Verified Tier 1 Enterprise Brand (Est. >20M+ visitors/mo)",
+        "video_ads_tech": "Verified Meta Video Ads: Active global video campaigns running in Meta Library for 'Gymshark'",
+        "onsite_video_tech": "Active hero video walkthroughs & workout campaign embeds present."
+    },
     "lululemon": {
         "business_type": "D2C Global Apparel & Activewear Enterprise",
         "conversion_model": "Global Multi-Currency Checkout",
