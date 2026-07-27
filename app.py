@@ -19,6 +19,8 @@ st.set_page_config(
 )
 
 # Initialize database
+import importlib
+importlib.reload(db)
 db.init_db()
 
 # Password Protection Gate for Client Access
@@ -362,7 +364,8 @@ with st.sidebar.expander("💬 Submit App Feedback (Kris / Client)", expanded=Fa
     
     if st.button("Submit Feedback Entry", type="primary", use_container_width=True, key="btn_submit_client_fb"):
         if fb_text.strip():
-            db.log_client_feedback(fb_domain, fb_category, fb_rating, fb_text)
+            if hasattr(db, 'log_client_feedback'):
+                db.log_client_feedback(fb_domain, fb_category, fb_rating, fb_text)
             st.toast("✅ Feedback logged successfully! Database updated.")
             st.success("Feedback recorded! Thank you, Kris.")
         else:
@@ -370,7 +373,7 @@ with st.sidebar.expander("💬 Submit App Feedback (Kris / Client)", expanded=Fa
 
 # Admin View Submitted Feedback Logs
 with st.sidebar.expander("📋 View Submitted Feedback Log", expanded=False):
-    feedback_entries = db.get_client_feedback()
+    feedback_entries = db.get_client_feedback() if hasattr(db, 'get_client_feedback') else []
     if feedback_entries:
         st.markdown(f"**Total Feedback Entries:** `{len(feedback_entries)}`")
         fb_df = pd.DataFrame(feedback_entries)
