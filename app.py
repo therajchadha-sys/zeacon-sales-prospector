@@ -427,11 +427,17 @@ with tab_prospect:
         biz_type = score_res.details.get('business_type', 'Commercial Enterprise')
         conv_model = score_res.details.get('conversion_model', 'Digital Conversion Engine')
 
+        clean_d = domain.split('/')[0].lower().replace('www.', '')
+        logo_url = f"https://www.google.com/s2/favicons?domain={clean_d}&sz=128"
+        
         header_col1, header_col2 = st.columns([1, 8])
         with header_col1:
-            logo_url = score_res.details.get('logo_url', '')
-            if logo_url:
-                st.image(logo_url, width=64)
+            st.markdown(
+                f'<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; width:64px; height:64px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 4px rgba(0,0,0,0.04);">'
+                f'<img src="{logo_url}" style="max-width:44px; max-height:44px; border-radius:6px;" onerror="this.onerror=null; this.src=\'https://logo.clearbit.com/{clean_d}\';">'
+                f'</div>',
+                unsafe_allow_html=True
+            )
         with header_col2:
             st.markdown(f"### Score Card for **{domain}**")
             st.markdown(f"<div class='category-badge'>🏢 Business Category: {biz_type} | Goal: {conv_model}</div>", unsafe_allow_html=True)

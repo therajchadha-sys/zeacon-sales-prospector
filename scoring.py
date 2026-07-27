@@ -110,7 +110,7 @@ class DomainScorer:
         clean_domain = domain.split('/')[0].lower()
         if clean_domain.startswith('www.'):
             clean_domain = clean_domain[4:]
-        return f"https://logo.clearbit.com/{clean_domain}"
+        return f"https://www.google.com/s2/favicons?domain={clean_domain}&sz=128"
 
     def check_pagespeed_impact(self, domain: str, dom: str) -> tuple:
         if not dom:
