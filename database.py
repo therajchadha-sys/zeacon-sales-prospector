@@ -73,6 +73,17 @@ def init_db():
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS client_feedback (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                domain TEXT,
+                category TEXT,
+                rating TEXT,
+                feedback TEXT,
+                submitted_by TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
         # Winning Outreach Templates / Examples Vault table
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS winning_outreach (
@@ -267,3 +278,19 @@ def save_brand_telemetry(domain: str, traffic_tier: str, traffic_score: int, sou
             VALUES (?, ?, ?, ?)
         ''', (domain.lower(), traffic_tier, traffic_score, source))
         conn.commit()
+
+def log_client_feedback(domain: str, category: str, rating: str, feedback: str, submitted_by: str = "Kris / Client"):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO client_feedback (domain, category, rating, feedback, submitted_by)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (domain, category, rating, feedback, submitted_by))
+        conn.commit()
+
+def get_client_feedback() -> List[Dict[str, Any]]:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM client_feedback ORDER BY timestamp DESC')
+        rows = cursor.fetchall()
+        return [dict(r) for r in rows]

@@ -352,6 +352,34 @@ with st.sidebar.expander("🔑 API Key Settings"):
 
 use_live_apis = st.sidebar.toggle("Use Live APIs", value=True)
 
+# In-The-Moment Client Feedback & Wishlist Submission
+with st.sidebar.expander("💬 Submit App Feedback (Kris / Client)", expanded=False):
+    st.markdown("<div style='font-size:0.8rem; font-weight:700; color:#0f172a; margin-bottom:0.4rem;'>Record In-The-Moment Feedback</div>", unsafe_allow_html=True)
+    fb_domain = st.session_state.get('current_domain', 'General Platform')
+    fb_category = st.selectbox("Feedback Area", ["🎯 Scoring & Telemetry", "👤 Contact Enrichment", "✉️ Outreach Copy & Briefing", "🎨 UI & Design", "🐛 Bug / Feature Request"], key="fb_cat")
+    fb_rating = st.selectbox("Rating", ["⭐⭐⭐⭐⭐ Excellent", "👍 Good / Minor Change", "💡 Suggestion / Idea", "⚠️ Needs Revision"], key="fb_rate")
+    fb_text = st.text_area("Your Notes / Desired Updates", placeholder="What is working well? What needs to be adjusted?", key="fb_notes", height=100)
+    
+    if st.button("Submit Feedback Entry", type="primary", use_container_width=True, key="btn_submit_client_fb"):
+        if fb_text.strip():
+            db.log_client_feedback(fb_domain, fb_category, fb_rating, fb_text)
+            st.toast("✅ Feedback logged successfully! Database updated.")
+            st.success("Feedback recorded! Thank you, Kris.")
+        else:
+            st.warning("Please enter your notes before submitting.")
+
+# Admin View Submitted Feedback Logs
+with st.sidebar.expander("📋 View Submitted Feedback Log", expanded=False):
+    feedback_entries = db.get_client_feedback()
+    if feedback_entries:
+        st.markdown(f"**Total Feedback Entries:** `{len(feedback_entries)}`")
+        fb_df = pd.DataFrame(feedback_entries)
+        st.dataframe(fb_df[['timestamp', 'category', 'rating', 'feedback', 'domain']], use_container_width=True)
+        csv_fb = fb_df.to_csv(index=False).encode('utf-8')
+        st.download_button("📥 Export Feedback to CSV", csv_fb, "client_feedback_log.csv", "text/csv", key="dl_fb_csv")
+    else:
+        st.info("No feedback submissions logged yet.")
+
 st.sidebar.info("Turn your storefront videos into revenue with consultative outreach.")
 
 st.markdown("<div class='results-badge'>See Results Immediately</div>", unsafe_allow_html=True)
