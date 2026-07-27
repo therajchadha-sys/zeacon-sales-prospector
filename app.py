@@ -178,7 +178,43 @@ st.markdown("""
         margin-top: 0.35rem;
         background-color: #f8fafc;
         padding: 0.35rem 0.65rem;
-        border-radius: 6px;
+        border-radius: 4px;
+    }
+
+    /* Living Tutorial Tooltips (Hover Popovers) */
+    [data-tooltip] {
+        position: relative;
+        cursor: help;
+    }
+
+    [data-tooltip]::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 110%;
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        background-color: #0f172a;
+        color: #ffffff;
+        padding: 0.7rem 0.9rem;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        line-height: 1.45;
+        white-space: normal;
+        width: 250px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+        z-index: 99999;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+        text-align: left;
+    }
+
+    [data-tooltip]:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
     }
 
     /* Primary actions */
@@ -402,16 +438,16 @@ with tab_prospect:
 
         m_col1, m_col2, m_col3, m_col4, m_col5 = st.columns(5)
         with m_col1:
-            st.markdown(f"<div class='metric-card'><div class='metric-title'>Match Score</div><div class='metric-value' style='color:#e11d48;'>{score_res.total_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 100</div></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='metric-card' data-tooltip='🎯 Composite ICP Score (0-100): Calculated from Video Ads (30pt), Audience Traffic Scale (25pt), On-Site Video (25pt), and Conversion Engine (20pt).'><div class='metric-title'>Match Score ℹ️</div><div class='metric-value' style='color:#e11d48;'>{score_res.total_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 100</div></div>", unsafe_allow_html=True)
         with m_col2:
-            st.markdown(f"<div class='metric-card'><div class='metric-title'>Video Ads</div><div class='metric-value'>{score_res.video_ads_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 30</div></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='metric-card' data-tooltip='📢 Paid Video Advertising (30pt): Scans DOM for active Meta/TikTok ad pixels and checks for active video campaigns in Meta Ad Library.'><div class='metric-title'>Video Ads ℹ️</div><div class='metric-value'>{score_res.video_ads_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 30</div></div>", unsafe_allow_html=True)
         with m_col3:
-            st.markdown(f"<div class='metric-card'><div class='metric-title'>Web Traffic</div><div class='metric-value'>{score_res.traffic_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 25</div></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='metric-card' data-tooltip='📈 Audience Scale (25pt): Evaluates global monthly visitor scale via OpenPageRank API and AI Brand Intelligence.'><div class='metric-title'>Web Traffic ℹ️</div><div class='metric-value'>{score_res.traffic_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 25</div></div>", unsafe_allow_html=True)
         with m_col4:
-            st.markdown(f"<div class='metric-card'><div class='metric-title'>On-Site Video</div><div class='metric-value'>{score_res.onsite_video_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 25</div></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='metric-card' data-tooltip='🎬 On-Site Video (25pt): Scans DOM for video tags, YouTube, Vimeo, Bambuser, Tolstoy, and Bazaarvoice UGC Video Reels.'><div class='metric-title'>On-Site Video ℹ️</div><div class='metric-value'>{score_res.onsite_video_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 25</div></div>", unsafe_allow_html=True)
         with m_col5:
             card_title = "Conversion Engine" if "Staffing" in biz_type or "SaaS" in biz_type or "Hospitality" in biz_type else "E-comm Cart"
-            st.markdown(f"<div class='metric-card'><div class='metric-title'>{card_title}</div><div class='metric-value'>{score_res.cart_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 20</div></div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='metric-card' data-tooltip='🛒 Conversion Engine (20pt): Identifies primary checkout or lead capture setup (Shopify, Custom Cart, Booking Engine, Staffing Portal).'><div class='metric-title'>{card_title} ℹ️</div><div class='metric-value'>{score_res.cart_score}</div><div style='color:#64748b; font-size:0.8rem;'>Max 20</div></div>", unsafe_allow_html=True)
 
         st.markdown("### 📋 Executive Sales Intelligence")
         
@@ -421,8 +457,8 @@ with tab_prospect:
             
             cart_raw = score_res.details.get('cart_tech', 'Unknown')
             st.markdown(f"""
-            <div class='finding-card'>
-                <div class='finding-title'>⚙️ Primary Conversion Model & Platform</div>
+            <div class='finding-card' data-tooltip='⚙️ Conversion Engine Audit: Evaluates whether the prospect uses Shopify Plus, WooCommerce, Custom E-Comm, Staffing Portals, or Booking Systems.'>
+                <div class='finding-title'>⚙️ Primary Conversion Model & Platform ℹ️</div>
                 <div class='finding-desc'><strong>Detected Setup:</strong> {cart_raw}</div>
                 <div class='finding-takeaway'>💡 <em>What this means:</em> Evaluated for {conv_model} capabilities.</div>
             </div>
@@ -431,8 +467,8 @@ with tab_prospect:
             social_platforms = score_res.details.get('social_active_platforms', 'None')
             social_corr = score_res.details.get('social_correlation', '')
             st.markdown(f"""
-            <div class='finding-card'>
-                <div class='finding-title'>📱 Social Media Video Asset Library</div>
+            <div class='finding-card' data-tooltip='📱 Social Asset Library: Scans for active Instagram, TikTok, Facebook, and YouTube channels. Zeacon automatically imports these existing video assets to populate website widgets.'>
+                <div class='finding-title'>📱 Social Media Video Asset Library ℹ️</div>
                 <div class='finding-desc'><strong>Active Platforms:</strong> {social_platforms}</div>
                 <div class='finding-takeaway'>💡 <em>Zeacon Opportunity Correlation:</em> {social_corr}</div>
             </div>
@@ -441,8 +477,8 @@ with tab_prospect:
             video_raw = score_res.details.get('video_onsite_tech', 'No video tracked')
             video_takeaway = "Great candidate for Zeacon! Floating video widgets will convert static site visitors." if score_res.onsite_video_score < 15 else "High video usage detected — prime candidate for Zeacon's ROI attribution analytics."
             st.markdown(f"""
-            <div class='finding-card'>
-                <div class='finding-title'>🎬 Website Video Presence</div>
+            <div class='finding-card' data-tooltip='🎬 On-Site Video Audit: Detects if the website already has embedded video players, YouTube/Vimeo embeds, or competitor widgets like Tolstoy/Bambuser/Bazaarvoice.'>
+                <div class='finding-title'>🎬 Website Video Presence ℹ️</div>
                 <div class='finding-desc'><strong>Current Setup:</strong> {video_raw}</div>
                 <div class='finding-takeaway'>💡 <em>What this means:</em> {video_takeaway}</div>
             </div>
@@ -450,8 +486,8 @@ with tab_prospect:
 
             speed_raw = score_res.details.get('pagespeed_details', 'Optimized')
             st.markdown(f"""
-            <div class='finding-card'>
-                <div class='finding-title'>⚡ Site Speed & Load Health</div>
+            <div class='finding-card' data-tooltip='⚡ Site Speed & Load Health: Evaluates total script count to ensure Zeacon lightweight asynchronous player (<50ms) will load smoothly.'>
+                <div class='finding-title'>⚡ Site Speed & Load Health ℹ️</div>
                 <div class='finding-desc'><strong>Status:</strong> {speed_raw}</div>
                 <div class='finding-takeaway'>💡 <em>What this means:</em> Pitch Zeacon's lightweight player that loads asynchronously under 50ms without slowing down their portal.</div>
             </div>
@@ -466,8 +502,8 @@ with tab_prospect:
             ad_takeaway = "Active Meta/TikTok advertising pixel detected on site — high ad spend driving video traffic." if has_meta_pixel else "No Meta Pixel script detected in DOM. Verify active video campaigns manually in Meta Ad Library."
 
             st.markdown(f"""
-            <div class='finding-card'>
-                <div class='finding-title'>📢 Paid Video Advertising Check {ad_badge}</div>
+            <div class='finding-card' data-tooltip='📢 Paid Video Advertising: Scans DOM for Meta/TikTok advertising pixels. Active pixels confirm the brand is spending ad dollars driving paid video traffic.'>
+                <div class='finding-title'>📢 Paid Video Advertising Check {ad_badge} ℹ️</div>
                 <div class='finding-desc'><strong>Status:</strong> {ad_raw}</div>
                 <div class='finding-takeaway'>💡 <em>What this means:</em> {ad_takeaway}</div>
             </div>
