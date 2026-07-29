@@ -142,6 +142,22 @@ def init_db():
                 INSERT INTO winning_outreach (title, email_body, notes)
                 VALUES (?, ?, ?)
             ''', ('Kris Real Closed Deal Email', kris_winning_template, 'Proven formula highlighting IG/FB/YouTube video library reuse, 8-12% sales lift, and CAC reduction.'))
+
+            kris_ceo_executive_report_template = (
+                "Hi [Name],\n\n"
+                "At Zeacon, we've built an AI-powered website video platform that doesn't just host videos—it continuously analyzes visitor behavior, measures the impact of every video, and identifies exactly where additional revenue is being created or lost.\n\n"
+                "In a recent 30-day split test analyzing 13,847 visitor sessions, Zeacon uncovered:\n"
+                "• 255+ additional conversions directly influenced by video\n"
+                "• 66% higher purchase rate from visitors who watched a video\n"
+                "• Over 2x higher engagement & dwell time\n\n"
+                "Unlike traditional analytics that show bounce rate, Zeacon answers executive questions: Which videos drive revenue? Which traffic sources convert vs just visit? Where do customers abandon the buying journey?\n\n"
+                "I'd be happy to prepare a personalized website video analysis for [Company] and walk through the exact opportunities Zeacon can uncover.\n\n"
+                "Best,\nKris Naidu\nCEO | Zeacon\n+1 206 487 1742 · Bellevue, WA\nCalendly: https://calendly.com/krisnaidu/zeacon"
+            )
+            cursor.execute('''
+                INSERT INTO winning_outreach (title, email_body, notes)
+                VALUES (?, ?, ?)
+            ''', ('Kris Executive Business Intelligence Pitch (July 2026)', kris_ceo_executive_report_template, 'Official CEO outreach formula: 13.8k session split test, 66% order lift, and Executive Q&A Framework.'))
             conn.commit()
 
 def log_prospect(score: DomainScore):
