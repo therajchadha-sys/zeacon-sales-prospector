@@ -117,6 +117,8 @@ def init_db():
                  'Behind-the-scenes kitchen tours and chef spotlight videos converted at 10.63% to 11.01% (nearly 3x higher than static control pages), demonstrating that authentic team video builds maximum buyer trust.'),
                 ('Logarithmic Dwell-Time Conversion Model', 'CR = α * ln(TOS) + β', 'Empirical Conversion Science', 
                  'Research across Wyzowl, Animoto, and CXL Institute confirms 82% of consumers are convinced to buy after watching brand videos. Time-on-site (TOS) scales conversion probability logarithmically, raising the conversion curve without hard-selling.'),
+                ('Zeacon 1-Pager Infographic (Updated 2026)', '+25% Avg CR Lift | 4x Time-on-Site', 'Universal Web Platform Integration', 
+                 'Zeacon takes existing social videos (IG/FB/TikTok/YouTube) and displays them automatically across Webflow, WordPress, Wix, Squarespace, Shopify, Square, or GoDaddy. Starts at $49/mo (5,000 sessions, unlimited video players). Takes <5 min setup with zero developer required.'),
                 ('Aston Martin Bellevue Luxury Lead Engine', 'High-Ticket Engagement Lift', 'Automotive Video Experiences', 
                  'Aston Martin of Bellevue utilizes Zeacon interactive video players to showcase luxury vehicles directly to high-intent buyers, personalizing the dealership experience.'),
                 ('Minamoto Japanese Cuisine Booking Boost', 'Elevated Booking Conversion', 'Hospitality & Dining Widgets', 
