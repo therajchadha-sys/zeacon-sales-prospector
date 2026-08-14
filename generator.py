@@ -281,10 +281,23 @@ class OutreachGenerator:
                 f"Sales Team | Zeacon"
             )
 
+        # Generate personalized <300 character LinkedIn Connection Note for Kris Naidu
+        first_name = contact.name.split()[0] if contact.name else "there"
+        biz_short = "e-commerce" if "D2C" in business_type or "Cart" in conversion_model else "digital growth"
+        
+        linkedin_text = (
+            f"Hi {first_name}, I'm Kris Naidu, CEO of Zeacon. Noticed {clean_domain}'s work in {biz_short} - we help brands turn social video into on-site revenue (avg +25% lift) with zero site speed impact. Would love to connect and share a quick video ROI audit for {clean_domain}!"
+        )
+        if len(linkedin_text) > 298:
+            linkedin_text = (
+                f"Hi {first_name}, I'm Kris Naidu, CEO of Zeacon. We help brands like {clean_domain} convert website visitors using interactive video (avg +25% lift). Would love to connect!"
+            )
+
         return OutreachDraft(
             persona=contact.title,
             subject=headline,
-            body=llm_body
+            body=llm_body,
+            linkedin_note=linkedin_text
         )
 
     def generate_executive_brief(self, domain_score: DomainScore, contact: Contact) -> str:

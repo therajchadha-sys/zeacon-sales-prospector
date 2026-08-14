@@ -809,10 +809,22 @@ with tab_prospect:
             if 'current_draft' not in st.session_state:
                 st.session_state['current_draft'] = generator.generate_draft(score_res, target_contact, best_ammo, user_tweak=tweak_input)
                 
-            active_draft = st.session_state['current_draft']
-            
+            st.markdown("##### 💼 LinkedIn Connection Invite Note (Kris Naidu, CEO Intro)")
+            ln_note = getattr(active_draft, 'linkedin_note', '')
+            if not ln_note:
+                first_name = target_contact.name.split()[0] if target_contact.name else "there"
+                clean_d = domain.split('.')[0].capitalize()
+                ln_note = f"Hi {first_name}, I'm Kris Naidu, CEO of Zeacon. Noticed {clean_d}'s website growth—we help brands turn social video into on-site revenue (avg +25% lift) with zero site speed impact. Would love to connect and share a quick video ROI audit for {clean_d}!"
+
+            char_len = len(ln_note)
+            char_badge = f"<span style='background:#ecfdf5; color:#059669; border:1px solid #a7f3d0; padding:2px 8px; border-radius:4px; font-size:0.75rem; font-weight:700;'>{char_len} / 300 chars (Fits LinkedIn Limit)</span>" if char_len <= 300 else f"<span style='background:#fef2f2; color:#dc2626; border:1px solid #fecaca; padding:2px 8px; border-radius:4px; font-size:0.75rem; font-weight:700;'>{char_len} / 300 chars (Too Long)</span>"
+
+            st.markdown(f"<div style='font-size:0.8rem; color:#475569; margin-bottom:0.35rem;'>Personalized invitation note for Kris to send on LinkedIn {char_badge}:</div>", unsafe_allow_html=True)
+            st.text_area("LinkedIn Connection Note (Copy & Paste)", value=ln_note, height=95, key="linkedin_note_display")
+
+            st.markdown("##### ✉️ Cold Email Draft")
             st.text_input("Outreach Subject Line", value=active_draft.subject, key="subject_display")
-            draft_body_area = st.text_area("Email Body Draft", value=active_draft.body, height=350, key="body_display")
+            draft_body_area = st.text_area("Email Body Draft", value=active_draft.body, height=320, key="body_display")
             
             log_btn = st.button("Log and Copy Message to Clipboard", type="primary")
             if log_btn:

@@ -29,3 +29,4 @@ class OutreachDraft(BaseModel):
     persona: str
     subject: str
     body: str
+    linkedin_note: Optional[str] = ""
