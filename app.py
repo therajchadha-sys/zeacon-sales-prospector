@@ -809,6 +809,7 @@ with tab_prospect:
             if 'current_draft' not in st.session_state:
                 st.session_state['current_draft'] = generator.generate_draft(score_res, target_contact, best_ammo, user_tweak=tweak_input)
                 
+            active_draft = st.session_state['current_draft']
             st.markdown("##### 💼 LinkedIn Connection Invite Note (Kris Naidu, CEO Intro)")
             ln_note = getattr(active_draft, 'linkedin_note', '')
             if not ln_note:
