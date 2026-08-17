@@ -390,7 +390,7 @@ st.markdown("<div class='results-badge'>See Results Immediately</div>", unsafe_a
 st.markdown("<h1 class='zeacon-header'>zeac<span class='zeacon-red-dot'>o</span>n prospector</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:#475569; font-size:1.1rem; margin-bottom: 2rem;'>Turn your videos into revenue. Qualify e-commerce stores and draft custom campaigns.</p>", unsafe_allow_html=True)
 
-tab_prospect, tab_analytics, tab_ammo = st.tabs(["🔍 Prospect Analyzer", "📊 Historical Database", "⚡ Proof Points & Winning Vault"])
+tab_prospect, tab_sequences, tab_analytics, tab_ammo = st.tabs(["🔍 Prospect Analyzer", "📅 Sequences & Follow-Ups", "📊 Historical Database", "⚡ Proof Points & Winning Vault"])
 
 with tab_prospect:
     col1, col2 = st.columns([2, 1])
@@ -827,7 +827,30 @@ with tab_prospect:
             st.text_input("Outreach Subject Line", value=active_draft.subject, key="subject_display")
             draft_body_area = st.text_area("Email Body Draft", value=active_draft.body, height=320, key="body_display")
             
-            log_btn = st.button("Log and Copy Message to Clipboard", type="primary")
+            st.markdown("##### 🚀 Outreach & Sequence Actions")
+            act_col1, act_col2 = st.columns([1.2, 1])
+            with act_col1:
+                channel_choice = st.selectbox("Sent Channel", ["Email", "LinkedIn Message", "LinkedIn Invite Note"], key="sel_sent_channel")
+            with act_col2:
+                enroll_btn = st.button("🚀 Mark Sent & Enroll in Sequence", type="primary", use_container_width=True, key="btn_enroll_seq")
+
+            if enroll_btn:
+                sent_body = ln_note if "LinkedIn Invite" in channel_choice else draft_body_area
+                seq_id = db.start_sequence(
+                    domain=domain,
+                    contact_name=target_contact.name,
+                    contact_email=target_contact.email,
+                    contact_title=target_contact.title,
+                    contact_linkedin=target_contact.linkedin or "",
+                    channel=channel_choice,
+                    initial_subject=active_draft.subject,
+                    initial_body=sent_body
+                )
+                db.log_outreach(domain, target_contact.name, target_contact.title, active_draft.subject, sent_body)
+                st.success(f"🎉 Enrolled {target_contact.name} ({clean_domain}) into Follow-Up Sequence! Next follow-up scheduled in 3 days.")
+                st.balloons()
+
+            log_btn = st.button("📋 Log Draft Only (No Sequence)")
             if log_btn:
                 log_id = db.log_outreach(domain, target_contact.name, target_contact.title, active_draft.subject, draft_body_area)
                 st.session_state['last_log_id'] = log_id
@@ -858,11 +881,156 @@ with tab_prospect:
                         del st.session_state['current_draft']
                     st.rerun()
 
-with tab_analytics:
-    st.subheader("Prospect Database Registry")
+with tab_sequences:
+    st.subheader("📅 Sales Sequences & Follow-Up Command Center")
+    st.markdown("<p style='color:#475569; font-size:0.95rem; margin-bottom:1rem;'>Manage active multi-touch cadences. Generate contextual follow-up copy, track reply status, and never let warm prospects slip through the cracks.</p>", unsafe_allow_html=True)
     
-    prospects = db.get_prospects()
-    if prospects:
+    all_sequences = db.get_sequences()
+    from datetime import datetime
+    now_dt = datetime.now()
+    
+    due_sequences = []
+    active_sequences = []
+    replied_sequences = []
+    completed_sequences = []
+    
+    for s in all_sequences:
+        st_status = s.get('status', 'ACTIVE')
+        if st_status == 'REPLIED':
+            replied_sequences.append(s)
+        elif st_status == 'COMPLETED':
+            completed_sequences.append(s)
+        elif st_status == 'ACTIVE':
+            active_sequences.append(s)
+            next_act = s.get('next_action_date')
+            if next_act:
+                try:
+                    act_dt = datetime.strptime(next_act.split('.')[0], '%Y-%m-%d %H:%M:%S')
+                    if act_dt <= now_dt:
+                        due_sequences.append(s)
+                except Exception:
+                    pass
+
+    sq_c1, sq_c2, sq_c3, sq_c4 = st.columns(4)
+    with sq_c1:
+        st.markdown(f"<div class='metric-card'><div class='metric-title'>🚨 Action Due Now</div><div class='metric-value' style='color:#dc2626;'>{len(due_sequences)}</div><div style='color:#64748b; font-size:0.8rem;'>Follow-ups due today</div></div>", unsafe_allow_html=True)
+    with sq_c2:
+        st.markdown(f"<div class='metric-card'><div class='metric-title'>⏳ Active Cadences</div><div class='metric-value' style='color:#0284c7;'>{len(active_sequences)}</div><div style='color:#64748b; font-size:0.8rem;'>In-progress sequences</div></div>", unsafe_allow_html=True)
+    with sq_c3:
+        st.markdown(f"<div class='metric-card'><div class='metric-title'>🎉 Replied / Booked</div><div class='metric-value' style='color:#059669;'>{len(replied_sequences)}</div><div style='color:#64748b; font-size:0.8rem;'>Positive responses</div></div>", unsafe_allow_html=True)
+    with sq_c4:
+        st.markdown(f"<div class='metric-card'><div class='metric-title'>✅ Completed</div><div class='metric-value' style='color:#475569;'>{len(completed_sequences)}</div><div style='color:#64748b; font-size:0.8rem;'>Finished 4-touch cycle</div></div>", unsafe_allow_html=True)
+
+    st.markdown("---")
+    
+    seq_filter = st.radio("Filter Sequence Queue:", ["🚨 Due for Action", "⏳ All Active", "🎉 Replied / Won", "📋 All Prospects"], horizontal=True)
+    
+    display_list = []
+    if seq_filter == "🚨 Due for Action":
+        display_list = due_sequences
+    elif seq_filter == "⏳ All Active":
+        display_list = active_sequences
+    elif seq_filter == "🎉 Replied / Won":
+        display_list = replied_sequences
+    else:
+        display_list = all_sequences
+
+    if not display_list:
+        st.info("No prospect sequences match this filter right now. Run a search in the Prospect Analyzer and click '🚀 Mark Sent & Enroll in Sequence' to get started!")
+    else:
+        seq_gen = OutreachGenerator(provider=model_provider, anthropic_api_key=anthropic_key, gemini_api_key=gemini_key)
+        for s in display_list:
+            s_id = s['id']
+            domain_name = s['domain']
+            contact_name = s.get('contact_name', 'Executive')
+            contact_title = s.get('contact_title', 'Decision Maker')
+            step = s.get('current_step', 1)
+            status = s.get('status', 'ACTIVE')
+            last_touch = s.get('last_touch_date', '')
+            next_action = s.get('next_action_date', 'Completed')
+            history = s.get('history', [])
+            
+            step_labels = {1: "Touch 1 (Initial Pitch)", 2: "Touch 2 (Social Proof Bump)", 3: "Touch 3 (Zero-Speed Handle)", 4: "Touch 4 (Executive Breakup)"}
+            next_step_label = step_labels.get(step + 1, "Completed")
+            
+            is_due = False
+            if next_action and next_action != 'Completed':
+                try:
+                    act_dt = datetime.strptime(next_action.split('.')[0], '%Y-%m-%d %H:%M:%S')
+                    is_due = act_dt <= now_dt
+                except Exception:
+                    pass
+
+            due_tag = "🔴 **DUE TODAY**" if is_due and status == 'ACTIVE' else f"Next: {next_action.split(' ')[0] if next_action else 'None'}"
+            expander_title = f"{'🚨 ' if is_due and status == 'ACTIVE' else '👤 '}{contact_name} @ {domain_name} — Step {step}/4 ({status}) | {due_tag}"
+            
+            with st.expander(expander_title, expanded=(is_due and status == 'ACTIVE')):
+                col_i1, col_i2 = st.columns([1, 1])
+                with col_i1:
+                    st.markdown(f"**Contact:** `{contact_name}` ({contact_title})")
+                    st.markdown(f"**Domain:** `{domain_name}` | **Email:** `{s.get('contact_email', 'None')}`")
+                    if s.get('contact_linkedin'):
+                        st.markdown(f"[🔗 Open LinkedIn Profile]({s.get('contact_linkedin')})")
+                with col_i2:
+                    st.markdown(f"**Current Cadence Progress:** `Step {step} of 4` ({step_labels.get(step, 'Initial')})")
+                    st.markdown(f"**Status:** `{status}` | **Last Contact:** `{last_touch.split(' ')[0] if last_touch else 'N/A'}`")
+                    st.markdown(f"**Scheduled Next Touch:** `{next_action.split(' ')[0] if next_action else 'N/A'}`")
+
+                # Sequence Touch History
+                if history:
+                    st.markdown("##### 📜 Previous Touch History")
+                    for h in history:
+                        st.markdown(f"""
+                        <div style='background:#f8fafc; border-left:3px solid #0284c7; padding:0.5rem 0.8rem; margin-bottom:0.4rem; border-radius:0 6px 6px 0; font-size:0.8rem;'>
+                            <strong>Touch {h.get('step')} ({h.get('channel')})</strong> • <em>{h.get('sent_at')}</em><br/>
+                            <span style='color:#475569;'><strong>Subject:</strong> {h.get('subject', 'N/A')}</span><br/>
+                            <div style='color:#334155; margin-top:0.2rem; white-space:pre-wrap;'>{h.get('body', '')[:200]}...</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+                # Next Touch Generator (If Active and Step < 4)
+                if status == 'ACTIVE' and step < 4:
+                    next_step = step + 1
+                    st.markdown(f"##### ✍️ AI-Generated {step_labels.get(next_step, 'Follow-Up')}")
+                    followup_drafts = seq_gen.generate_followup_draft(s, step=next_step)
+                    
+                    fu_tab_email, fu_tab_li = st.tabs(["✉️ Follow-Up Email", "💼 LinkedIn Follow-Up"])
+                    with fu_tab_email:
+                        st.text_input("Subject Line", value=followup_drafts['email_subject'], key=f"fu_subj_{s_id}_{next_step}")
+                        fu_email_body = st.text_area("Email Copy (1-Click Copy)", value=followup_drafts['email_body'], height=200, key=f"fu_body_{s_id}_{next_step}")
+                    with fu_tab_li:
+                        fu_li_msg = st.text_area("LinkedIn Message", value=followup_drafts['linkedin_message'], height=100, key=f"fu_li_{s_id}_{next_step}")
+
+                    act_c1, act_c2, act_c3 = st.columns([1.5, 1.2, 1])
+                    with act_c1:
+                        fu_channel = st.selectbox("Sent via", ["Email", "LinkedIn Message"], key=f"fu_chan_{s_id}")
+                        if st.button(f"✅ Mark Touch {next_step} Sent (+Advance)", type="primary", key=f"btn_adv_{s_id}"):
+                            body_to_save = fu_li_msg if "LinkedIn" in fu_channel else fu_email_body
+                            db.advance_sequence(s_id, fu_channel, followup_drafts['email_subject'], body_to_save)
+                            st.toast("Sequence advanced! Next step scheduled.")
+                            st.rerun()
+                    with act_c2:
+                        if st.button("🎉 Mark Replied / Booked", key=f"btn_rep_{s_id}"):
+                            db.update_sequence_status(s_id, 'REPLIED')
+                            st.toast("Prospect marked as REPLIED! Congratulations.")
+                            st.rerun()
+                    with act_c3:
+                        if st.button("🗑️ Delete", key=f"btn_del_{s_id}"):
+                            db.delete_sequence(s_id)
+                            st.toast("Sequence deleted.")
+                            st.rerun()
+                else:
+                    st.markdown("##### Actions")
+                    r_c1, r_c2 = st.columns(2)
+                    with r_c1:
+                        if status == 'REPLIED':
+                            st.success("🎉 Meeting / Conversation in progress!")
+                        else:
+                            st.info("Sequence cycle completed.")
+                    with r_c2:
+                        if st.button("🗑️ Remove Sequence", key=f"btn_del_done_{s_id}"):
+                            db.delete_sequence(s_id)
+                            st.rerun()
         df = pd.DataFrame(prospects)
         st.dataframe(df[['domain', 'total_score', 'video_ads_score', 'traffic_score', 'onsite_video_score', 'cart_score', 'timestamp']], use_container_width=True)
         

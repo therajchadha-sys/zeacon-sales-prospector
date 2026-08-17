@@ -2,6 +2,7 @@ import sqlite3
 import json
 import os
 from typing import List, Dict, Any, Optional
+from datetime import datetime, timedelta
 from models import DomainScore, Contact
 
 DB_PATH = 'zeacon_prospector.db'
@@ -82,6 +83,23 @@ def init_db():
                 feedback TEXT,
                 submitted_by TEXT,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS prospect_sequences (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                domain TEXT NOT NULL,
+                contact_name TEXT,
+                contact_email TEXT,
+                contact_title TEXT,
+                contact_linkedin TEXT,
+                current_step INTEGER DEFAULT 1,
+                status TEXT DEFAULT 'ACTIVE',
+                last_channel TEXT DEFAULT 'Email',
+                last_touch_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                next_action_date DATETIME,
+                history_json TEXT DEFAULT '[]',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
         # Winning Outreach Templates / Examples Vault table
@@ -312,3 +330,96 @@ def get_client_feedback() -> List[Dict[str, Any]]:
         cursor.execute('SELECT * FROM client_feedback ORDER BY timestamp DESC')
         rows = cursor.fetchall()
         return [dict(r) for r in rows]
+
+def calculate_next_touch_date(current_step: int) -> str:
+    """
+    Cadence Schedule:
+    Touch 1 -> Touch 2: +3 days
+    Touch 2 -> Touch 3: +4 days
+    Touch 3 -> Touch 4: +7 days
+    """
+    days_to_add = 3 if current_step == 1 else (4 if current_step == 2 else 7)
+    return (datetime.now() + timedelta(days=days_to_add)).strftime('%Y-%m-%d %H:%M:%S')
+
+def start_sequence(domain: str, contact_name: str, contact_email: str, contact_title: str, contact_linkedin: str, channel: str, initial_subject: str, initial_body: str) -> int:
+    next_date = calculate_next_touch_date(1)
+    history = [{
+        "step": 1,
+        "channel": channel,
+        "subject": initial_subject,
+        "body": initial_body,
+        "sent_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }]
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO prospect_sequences (domain, contact_name, contact_email, contact_title, contact_linkedin, current_step, status, last_channel, last_touch_date, next_action_date, history_json)
+            VALUES (?, ?, ?, ?, ?, 1, 'ACTIVE', ?, datetime('now'), ?, ?)
+        ''', (domain, contact_name, contact_email, contact_title, contact_linkedin, channel, next_date, json.dumps(history)))
+        conn.commit()
+        return cursor.lastrowid
+
+def get_sequences(status: Optional[str] = None) -> List[Dict[str, Any]]:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        if status and status != 'ALL':
+            cursor.execute('SELECT * FROM prospect_sequences WHERE status = ? ORDER BY next_action_date ASC', (status,))
+        else:
+            cursor.execute('SELECT * FROM prospect_sequences ORDER BY status ASC, next_action_date ASC')
+        rows = cursor.fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            try:
+                d['history'] = json.loads(d.get('history_json', '[]'))
+            except Exception:
+                d['history'] = []
+            result.append(d)
+        return result
+
+def advance_sequence(sequence_id: int, channel: str, sent_subject: str, sent_body: str) -> bool:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM prospect_sequences WHERE id = ?', (sequence_id,))
+        row = cursor.fetchone()
+        if not row:
+            return False
+        
+        current_step = row['current_step'] + 1
+        new_status = 'COMPLETED' if current_step > 4 else 'ACTIVE'
+        next_date = calculate_next_touch_date(current_step) if new_status == 'ACTIVE' else None
+        
+        try:
+            history = json.loads(row['history_json'] or '[]')
+        except Exception:
+            history = []
+            
+        history.append({
+            "step": current_step,
+            "channel": channel,
+            "subject": sent_subject,
+            "body": sent_body,
+            "sent_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+        
+        cursor.execute('''
+            UPDATE prospect_sequences
+            SET current_step = ?, status = ?, last_channel = ?, last_touch_date = datetime('now'), next_action_date = ?, history_json = ?
+            WHERE id = ?
+        ''', (current_step, new_status, channel, next_date, json.dumps(history), sequence_id))
+        conn.commit()
+        return True
+
+def update_sequence_status(sequence_id: int, new_status: str) -> bool:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('UPDATE prospect_sequences SET status = ? WHERE id = ?', (new_status, sequence_id))
+        conn.commit()
+        return True
+
+def delete_sequence(sequence_id: int) -> bool:
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM prospect_sequences WHERE id = ?', (sequence_id,))
+        conn.commit()
+        return True

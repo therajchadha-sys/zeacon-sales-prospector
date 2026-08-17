@@ -354,3 +354,64 @@ class OutreachGenerator:
             f"2. 🛠️ **Tech Stack Ecosystem**: Integrates natively alongside {reviews if reviews != 'None' else 'detected'} review engines & {email if email != 'None' else 'marketing'} tools with zero script bloat.\n"
             f"3. 🎯 **Consultative Pitch Angle**: Lead with Zeacon's ability to lower CAC and turn static storefront visitors into engaged video buyers."
         )
+
+    def generate_followup_draft(self, sequence: Dict[str, Any], domain_score: Optional[DomainScore] = None, step: int = 2) -> Dict[str, str]:
+        """
+        Generates contextual follow-up messages for Touch 2 (Social proof bump),
+        Touch 3 (Technical ease/speed handle), and Touch 4 (Executive breakup/audit).
+        """
+        contact_name = sequence.get('contact_name', 'there')
+        first_name = contact_name.split()[0] if contact_name else "there"
+        domain = sequence.get('domain', '')
+        clean_domain = domain.split('.')[0].capitalize()
+        
+        # Touch 2: Social Proof & Split Test Metrics (+3 days)
+        if step == 2:
+            email_subj = f"Re: Conversion uplift opportunity for {clean_domain}"
+            email_body = (
+                f"Hi {first_name},\n\n"
+                f"Following up on my previous note. Wanted to quickly share some recent data that might be relevant for {clean_domain}:\n\n"
+                f"In our latest 30-day controlled split test (13,847 visitor sessions), adding interactive video feeds generated a +66% lift in online purchase rates and 2x higher visitor dwell time compared to static pages.\n\n"
+                f"Because Zeacon automatically connects to your existing social video library (Instagram, TikTok, YouTube), there's zero content production required on your end.\n\n"
+                f"Would you be open to a 5-minute preview this week?\n\n"
+                f"Best,\nKris Naidu\nCEO | Zeacon\n+1 206 487 1742 · Bellevue, WA"
+            )
+            linkedin_msg = (
+                f"Hi {first_name}, following up on my note! We recently ran a 30-day split test showing +66% order lift when adding interactive social video to storefronts. Would love to show you how {clean_domain} can do this with zero new video production."
+            )
+            
+        # Touch 3: Speed & Technical Ease (<50ms async player, $49/mo) (+4 days)
+        elif step == 3:
+            email_subj = f"Zero-code video commerce for {clean_domain}"
+            email_body = (
+                f"Hi {first_name},\n\n"
+                f"Most marketing leaders we speak with love video but worry about site speed and developer resources.\n\n"
+                f"Zeacon was built specifically to solve this: our lightweight asynchronous player loads in under 50ms (zero impact on Core Web Vitals) and installs in under 5 minutes on Shopify, Webflow, WordPress, or custom platforms with a single line of code.\n\n"
+                f"Plans start at just $49/mo (5,000 sessions, unlimited players), making it a zero-risk way to test interactive video on {clean_domain}.\n\n"
+                f"Do you have 10 minutes next Tuesday for a quick look?\n\n"
+                f"Best,\nKris Naidu\nCEO | Zeacon\nCalendly: https://calendly.com/krisnaidu/zeacon"
+            )
+            linkedin_msg = (
+                f"Hi {first_name}, quick technical note: Zeacon loads asynchronously in <50ms with zero impact on site speed, and integrates in 5 mins. Happy to send over a 1-minute live demo on {clean_domain} if interested!"
+            )
+            
+        # Touch 4: Executive Breakup / Free Personalized Audit (+7 days)
+        else:
+            email_subj = f"Closing the loop on {clean_domain} video audit"
+            email_body = (
+                f"Hi {first_name},\n\n"
+                f"I realize you're likely focused on other priorities right now, so I'll close the loop here.\n\n"
+                f"If you'd ever like to see where {clean_domain} might be losing conversions on static landing pages, I'd be happy to prepare a complimentary Video ROI Audit for your team down the road.\n\n"
+                f"Wishing you and the {clean_domain} team continued growth!\n\n"
+                f"Best regards,\nKris Naidu\nCEO | Zeacon\nhttps://www.zeacon.com"
+            )
+            linkedin_msg = (
+                f"Hi {first_name}, closing the loop here! If optimizing visitor conversion with interactive video ever becomes a priority for {clean_domain}, feel free to reach out anytime. Wishing you great success!"
+            )
+            
+        return {
+            "step": step,
+            "email_subject": email_subj,
+            "email_body": email_body,
+            "linkedin_message": linkedin_msg
+        }
