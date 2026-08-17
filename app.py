@@ -1031,6 +1031,12 @@ with tab_sequences:
                         if st.button("🗑️ Remove Sequence", key=f"btn_del_done_{s_id}"):
                             db.delete_sequence(s_id)
                             st.rerun()
+
+with tab_analytics:
+    st.subheader("Prospect Database Registry")
+    
+    prospects = db.get_prospects()
+    if prospects:
         df = pd.DataFrame(prospects)
         st.dataframe(df[['domain', 'total_score', 'video_ads_score', 'traffic_score', 'onsite_video_score', 'cart_score', 'timestamp']], use_container_width=True)
         
